@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+# encoding: utf-8
+import sys
+import os
+from types import FunctionType
+
+def usage():
+	print "Usage: %s <test module>" % sys.argv[0]
+	exit(1)
+
+RESULT = 0
+TP_FUNCTIONS = "does answer can".split()
+TESTFILE = -1
+
+def main():
+	if len(sys.argv) != 2: usage()
+
+	mymod = __import__(sys.argv[TESTFILE])
+	
+	# Extract functions from the test module.
+	tests = [getattr(mymod, x) for x in dir(mymod) if isinstance(getattr(mymod, x), FunctionType)]
+
+	# Filter out functions that we've defined. 
+	# TODO: Make this select only the functions defined in the test module, NOT any
+	# other functions that were imported or in this testing framework.
+	tests = [t for t in tests if t.__name__ not in TP_FUNCTIONS]
+	
+	for test in tests:
+		for question in test():
+			sys.stdout.write("F."[question[RESULT]])
+	print
+
+if __name__ == '__main__':
+	main()
+
